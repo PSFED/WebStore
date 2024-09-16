@@ -23,7 +23,7 @@ from config import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("goods.urls", namespace="goods")),
+    path("api/v1/", include("api.urls")),
 ]
 
 if settings.DEBUG:

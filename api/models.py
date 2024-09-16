@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Categories(models.Model):
@@ -22,3 +23,18 @@ class Goods(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} | {self.price} | {self.in_stock}"
+
+
+class Cart(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.id
+
+
+class CartItem(models.Model):
+    good = models.ForeignKey(Goods, on_delete=models.CASCADE, related_name="cart_item")
+    quantity = models.IntegerField(default=0)
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, blank=True, null=True, related_name="items"
+    )
