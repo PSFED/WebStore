@@ -27,9 +27,10 @@ class Goods(models.Model):
 
 class Cart(models.Model):
     created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class CartItem(models.Model):
@@ -38,3 +39,6 @@ class CartItem(models.Model):
     cart = models.ForeignKey(
         Cart, on_delete=models.CASCADE, blank=True, null=True, related_name="items"
     )
+
+    def __str__(self):
+        return str(self.good.name)
