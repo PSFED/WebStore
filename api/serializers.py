@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from api.models import Goods, Categories, Cart, CartItem
 
 
@@ -10,26 +9,32 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class GoodsSerializer(serializers.ModelSerializer):
-    category = CategoriesSerializer(many=False)
+    category = CategoriesSerializer()
 
     class Meta:
         model = Goods
-        exclude = (
-            "image",
-            "slug",
+        fields = (
+            "name",
+            "description",
+            "price",
+            "discount",
+            "availability",
+            "in_stock",
+            "category",
         )
+        # exclude = (
+        #     "image",
+        #     "slug",
+        # )
 
 
 class CartItemSerializer(serializers.ModelSerializer):
     total_item_price = serializers.SerializerMethodField(method_name="sum")
-    good = GoodsSerializer(many=False)
+    good = GoodsSerializer()
 
     class Meta:
         model = CartItem
         fields = "__all__"
-
-    # def sum(self):
-    #     return self.quantity * (self.good.price * self.good.discount)
 
     def sum(self, CartItem):
         sum = (CartItem.quantity * CartItem.good.price) * (
