@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
-from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .serializers import *
 from .models import *
@@ -19,10 +20,31 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
     permission_classes = (IsAuthenticated,)
 
-    def list(self, request):
-        user = request.user
-        cart = Cart.objects.filter(user=user).first()
-        if cart:
-            serializer = CartSerializer(cart)
-            return Response(serializer.data)
-        return Response({"detail": "Cart not found"}, status=404)
+    def list(self, request, *args, **kwargs):
+        cart, _ = Cart.objects.get_or_create(user=request.user).first()
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
+
+    # def add_good(self, request):
+    #     user = request.user
+    #     good_id = request.data.get("good_id")
+    #     quantity = request.data.get("quantity", 1)
+
+    #     try:
+    #         item = Goods.objects.get(id=good_id)
+    #     except Goods.DoesNotExist:
+    #         return Response(
+    #             {"detail": "Good not found"}, status=status.HTTP_400_NOT_FOUND
+    #         )
+
+    #     cart, created = Cart.objects.get_or_create(user=user)
+    #     cart_good, created = CartItem.objects.get_or_create(cart=cart, item=item)
+    #     cart_good.quantity += quantity
+    #     cart_good.save()
+
+    #     return Response({"detail": "Good not found"}, status=status.HTTP_200_OK)
+
+    # serializer = CartSerializer(data=request.data)
+    # serializer.is_valid(raise_exception=True)
+    # serializer.save()
+    # return Response({"post": serializer.data})

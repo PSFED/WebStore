@@ -28,6 +28,7 @@ class Goods(models.Model):
 class Cart(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    goods = models.ManyToManyField(Goods, through="CartItem")
 
     def __str__(self):
         return str(self.id)
@@ -35,7 +36,7 @@ class Cart(models.Model):
 
 class CartItem(models.Model):
     good = models.ForeignKey(Goods, on_delete=models.CASCADE, related_name="cart_item")
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=1)
     cart = models.ForeignKey(
         Cart, on_delete=models.CASCADE, blank=True, null=True, related_name="items"
     )

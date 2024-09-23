@@ -36,11 +36,10 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = "__all__"
 
-    def sum(self, CartItem):
-        sum = (CartItem.quantity * CartItem.good.price) * (
-            1 - CartItem.good.discount / 100
+    def sum(self, cart_item):
+        return (cart_item.quantity * cart_item.good.price) * (
+            1 - cart_item.good.discount / 100
         )
-        return sum
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -48,14 +47,14 @@ class CartSerializer(serializers.ModelSerializer):
     created = serializers.DateTimeField(read_only=True)
     items = CartItemSerializer(many=True)
     total_price = serializers.SerializerMethodField(method_name="total")
-    user = serializers.CharField()
+    user = serializers.CharField(read_only=True)
 
     class Meta:
         model = Cart
         fields = "__all__"
 
-    def total(self, Cart):
-        items = Cart.items.all()
+    def total(self, cart):
+        items = cart.items.all()
         summary = sum(
             [
                 (item.quantity * item.good.price) * (1 - item.good.discount / 100)
@@ -63,3 +62,6 @@ class CartSerializer(serializers.ModelSerializer):
             ]
         )
         return summary
+
+    # def create(self, validated_data):
+    #     return Cart.objects.create(**validated_data)
