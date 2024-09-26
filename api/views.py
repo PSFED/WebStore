@@ -21,30 +21,40 @@ class CartViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
-        cart, _ = Cart.objects.get_or_create(user=request.user).first()
+        cart, _ = Cart.objects.get_or_create(user=request.user)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
-    # def add_good(self, request):
-    #     user = request.user
-    #     good_id = request.data.get("good_id")
-    #     quantity = request.data.get("quantity", 1)
+    def get_cart(self, user):
+        cart, created = Cart.objects.get_or_create(user=user)
+        return cart
 
-    #     try:
-    #         item = Goods.objects.get(id=good_id)
-    #     except Goods.DoesNotExist:
-    #         return Response(
-    #             {"detail": "Good not found"}, status=status.HTTP_400_NOT_FOUND
-    #         )
+    @action(methods=["post"], detail=False, url_path="add-item")
+    def add_item(self, request):
+        user = request.user
+        item_id = request.data.get("item_id")
+        quantity = request.data.get("quantity", 1)
 
-    #     cart, created = Cart.objects.get_or_create(user=user)
-    #     cart_good, created = CartItem.objects.get_or_create(cart=cart, item=item)
-    #     cart_good.quantity += quantity
-    #     cart_good.save()
+        if not item_id:
+            return Response(
+                {"detail": "item_id is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-    #     return Response({"detail": "Good not found"}, status=status.HTTP_200_OK)
+        try:
+            item = Goods.objects.get(id=item_id)
+        except Goods.DoesNotExist:
+            return Response(
+                {"detail": "Item not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
-    # serializer = CartSerializer(data=request.data)
-    # serializer.is_valid(raise_exception=True)
-    # serializer.save()
-    # return Response({"post": serializer.data})
+        cart = self.get_cart(user)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, good=item)
+        if not created:
+            cart_item.quantity += int(quantity)
+            cart_item.save()
+        else:
+            cart_item.quantity = int(quantity)
+            cart_item.save()
+
+        serializer = CartItemSerializer(cart_item)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

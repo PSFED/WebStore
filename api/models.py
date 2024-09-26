@@ -1,5 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class Categories(models.Model):
@@ -27,8 +29,8 @@ class Goods(models.Model):
 
 class Cart(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    goods = models.ManyToManyField(Goods, through="CartItem")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="+")
+    good = models.ManyToManyField(Goods, through="CartItem")
 
     def __str__(self):
         return str(self.id)

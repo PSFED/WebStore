@@ -13,19 +13,19 @@ class GoodsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Goods
-        fields = (
-            "name",
-            "description",
-            "price",
-            "discount",
-            "availability",
-            "in_stock",
-            "category",
-        )
-        # exclude = (
-        #     "image",
-        #     "slug",
+        # fields = (
+        #     "name",
+        #     "description",
+        #     "price",
+        #     "discount",
+        #     "availability",
+        #     "in_stock",
+        #     "category",
         # )
+        exclude = (
+            "image",
+            "slug",
+        )
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -62,6 +62,3 @@ class CartSerializer(serializers.ModelSerializer):
             ]
         )
         return summary
-
-    # def create(self, validated_data):
-    #     return Cart.objects.create(**validated_data)
