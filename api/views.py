@@ -52,9 +52,31 @@ class CartViewSet(viewsets.ModelViewSet):
         if not created:
             cart_item.quantity += int(quantity)
             cart_item.save()
+            cart.save()
         else:
             cart_item.quantity = int(quantity)
             cart_item.save()
+            cart.save()
 
         serializer = CartItemSerializer(cart_item)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=["delete"], detail=False, url_path="delete")
+    def delete_item(self, request):
+        user = request.user
+        item_id = request.data.get("item_id")
+
+        if not item_id:
+            return Response(
+                {"detail": "item_id is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            item = Goods.objects.get(id=item_id)
+        except Goods.DoesNotExist:
+            return Response(
+                {"detail": "Item not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        cart = self.get_cart(user)
+        cart_item = CartItem.objects.filter(cart=cart, good=item)
+        cart_item.delete()
+        return Response({"detail": str(item) + "deleted"})
